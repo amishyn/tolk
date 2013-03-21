@@ -46,19 +46,23 @@ module Tolk
       end
 
     end
-
+    
+    # todo rename to read locale files
     def read_locale_file
-      locale_file = "#{self.locales_config_path}/#{self.name}.yml"
-      raise "Locale file #{locale_file} does not exists" unless File.exists?(locale_file)
+      data = {}
+      locale_files = Dir["#{self.locales_config_path}/**/*#{self.name}*.yml"]
+      locale_files.each do |locale_file|
+        raise "Locale file #{locale_file} does not exists" unless File.exists?(locale_file)
 
-      puts "[INFO] Reading #{locale_file} for locale #{self.name}"
-      begin
-        self.class.flat_hash(YAML::safe_load(IO.read(locale_file))[self.name])
-      rescue
-        puts "[ERROR] File #{locale_file} expected to declare #{self.name} locale, but it does not. Skipping this file."
-        nil
+        puts "[INFO] Reading #{locale_file} for locale #{self.name}"
+        begin
+          data.merge! self.class.flat_hash(YAML::safe_load(IO.read(locale_file))[self.name])
+        rescue
+          puts "[ERROR] File #{locale_file} expected to declare #{self.name} locale, but it does not. Skipping this file."
+          nil
+        end
       end
-
+      data
     end
 
   end
