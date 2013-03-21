@@ -10,7 +10,12 @@ module Tolk
       end
 
       def load_translations
-        I18n.backend.send :init_translations unless I18n.backend.initialized? # force load
+        # I18n.backend.send :init_translations  # force load
+        unless I18n.backend.initialized?
+          filenames = Dir["#{self.locales_config_path}/#{primary_locale.name}.yml"]
+          I18n.backend.send :load_translations, filenames
+          I18n.backend.instance_variable_set "@initialized", true
+        end
         translations = flat_hash(I18n.backend.send(:translations)[primary_locale.name.to_sym])
         filter_out_i18n_keys(translations.merge(read_primary_locale_file))
       end
